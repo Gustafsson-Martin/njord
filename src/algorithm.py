@@ -4,30 +4,31 @@ class Algorithm():
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls.algorithms.append(cls())
+        instance = cls()
+        Algorithm.algorithms.append(instance)
+        cls.algorithms = [instance]
 
     @classmethod
-    def buy(cls, **kwargs):
-        print(f"Algorithm.buy called with {kwargs}")
-        for algorithm in cls.algorithms:
-            algorithm.buy(**kwargs)
-
-    @classmethod
-    def sell(cls, **kwargs):
-        print(f"Algorithm.sell called with {kwargs}")
-        for algorithm in cls.algorithms:
-            algorithm.sell(**kwargs)
-
+    def run(cls, chart):
+        lst = []
+        for i in range(len(chart.candlesticks)):
+            for algorithm in cls.algorithms:
+                algorithm.buying_rule(chart, i)
+                algorithm.selling_rule(chart, i)
+                lst.append(algorithm.cash + algorithm.stocks*chart.candlesticks[i])
+        return lst
 
 class MyAlgorithm(Algorithm):
-    def buy(self, **kwargs):
-        print(f"MyAlgorithm.buy called with {kwargs}")
+    def buying_rule(self, **kwargs):
+        print(f"MyAlgorithm.buying_rule called with {kwargs}")
 
 
 class MyOtherAlgorithm(Algorithm):
-    def buy(self, **kwargs):
-        print(f"MyOtherAlgorithm.buy called with {kwargs}")
+    def buying_rule(self, **kwargs):
+        print(f"MyOtherAlgorithm.buying_rule called with {kwargs}")
 
 
 if __name__ == "__main__":
-    Algorithm.buy(stock="AAPL",amount=10)
+    Algorithm.run(stock="AAPL",amount=10)
+    MyAlgorithm.run(stock="AAPL",amount=10)
+    MyOtherAlgorithm.run(stock="AAPL",amount=10)
